@@ -14,5 +14,9 @@ build/
 .DS_Store
 Thumbs.db
 
-# Reports
-reports/
+# Relatórios gerados na raiz (não ignorar backend/reports com templates)
+/reports/
+
+# Runtime logs (Lume logger; cwd do uvicorn pode criar backend/lume/logs)
+lume/logs/
+backend/lume/logs/

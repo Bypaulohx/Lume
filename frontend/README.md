@@ -1,6 +1,6 @@
-# WebVulnScanner — Frontend
+# Lume — Frontend
 
-Interface React + TypeScript para o scanner de vulnerabilidades web.
+Interface React + TypeScript para análise de segurança web (Lume V2.0).
 
 ## Como rodar
 
@@ -9,16 +9,19 @@ Interface React + TypeScript para o scanner de vulnerabilidades web.
    npm install
    ```
 
-2. **Suba a API** (em outro terminal, na raiz do projeto):
+2. **Suba a API** (outro terminal, pasta `backend` na raiz do repositório):
    ```bash
-   uvicorn api.main:app --reload --port 8000
+   cd backend
+   python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
    ```
+
+   Na raiz do projeto, execute uma vez: `pip install -e .` para instalar o pacote `lume`.
 
 3. **Inicie o frontend:**
    ```bash
    npm run dev
    ```
 
-4. Acesse: http://localhost:5173
+4. Acesse: **http://127.0.0.1:5173**
 
-O Vite já está configurado para fazer proxy de `/api` para `http://127.0.0.1:8000`, então as requisições funcionam automaticamente.
+O Vite faz proxy de `/api` para `http://127.0.0.1:8000`.

@@ -2,7 +2,7 @@
 
 ## 📊 Resumo Executivo
 
-Seu projeto **WebVulnScanner** foi transformado em **Lume V2.0**, uma ferramenta profissional de análise de segurança web com arquitetura moderna, múltiplos engines especializados e relatórios executivos.
+O **Lume V2.0** é a ferramenta de análise de segurança web deste repositório: arquitetura atual, múltiplos motores especializados e relatórios executivos.
 
 ---
 

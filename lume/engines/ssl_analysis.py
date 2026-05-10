@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 import socket
+import ssl
 from lume.core import setup_logger
 from lume.utils.errors import SSLAnalysisError
 
@@ -76,8 +77,7 @@ class SSLAnalysisEngine:
         """
         try:
             self.logger.info(f"Analyzing certificate for {hostname}:{port}")
-            
-            import ssl
+
             import certifi
             from datetime import datetime
             
@@ -145,12 +145,13 @@ class SSLAnalysisEngine:
         
         # Protocols to test
         protocols = [
-            ("SSLv2", ssl.PROTOCOL_SSLv2 if hasattr(ssl, "PROTOCOL_SSLv2") else None),
-            ("SSLv3", ssl.PROTOCOL_SSLv3 if hasattr(ssl, "PROTOCOL_SSLv3") else None),
-            ("TLSv1.0", ssl.PROTOCOL_TLSv1),
-            ("TLSv1.1", ssl.PROTOCOL_TLSv1_1),
-            ("TLSv1.2", ssl.PROTOCOL_TLSv1_2),
-            ("TLSv1.3", ssl.PROTOCOL_TLS if hasattr(ssl, "PROTOCOL_TLS") else None),
+            ("SSLv2", getattr(ssl, "PROTOCOL_SSLv2", None)),
+            ("SSLv3", getattr(ssl, "PROTOCOL_SSLv3", None)),
+            ("TLSv1.0", getattr(ssl, "PROTOCOL_TLSv1", None)),
+            ("TLSv1.1", getattr(ssl, "PROTOCOL_TLSv1_1", None)),
+            ("TLSv1.2", getattr(ssl, "PROTOCOL_TLSv1_2", None)),
+            # PROTOCOL_TLS negocia a versão mais alta possível (rótulo TLSv1.3 é aproximado).
+            ("TLSv1.3", getattr(ssl, "PROTOCOL_TLS_CLIENT", None) or getattr(ssl, "PROTOCOL_TLS", None)),
         ]
         
         for proto_name, proto_version in protocols:

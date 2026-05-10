@@ -58,7 +58,27 @@ class ReconnaissanceEngine:
         """
         self.logger = setup_logger(__name__)
         self.timeout = timeout
-        self.nm = nmap.PortScanner()
+        self._nm: Optional[nmap.PortScanner] = None
+        self._nmap_available: Optional[bool] = None
+
+    def _get_port_scanner(self) -> Optional[nmap.PortScanner]:
+        """Cria PortScanner só quando necessário (evita erro se o binário nmap não existir)."""
+        if self._nmap_available is False:
+            return None
+        if self._nm is not None:
+            return self._nm
+        try:
+            self._nm = nmap.PortScanner()
+            self._nmap_available = True
+            return self._nm
+        except nmap.PortScannerError as exc:
+            self._nmap_available = False
+            self.logger.warning(
+                'Executável nmap não encontrado no PATH (%s). '
+                'Instale o Nmap para Windows ou ignore o scan de portas.',
+                exc,
+            )
+            return None
     
     def scan_ports(
         self,
@@ -81,16 +101,20 @@ class ReconnaissanceEngine:
             NmapError: If scan fails
         """
         try:
+            nm = self._get_port_scanner()
+            if nm is None:
+                return []
+
             self.logger.info(f"Starting port scan on {target}")
-            
+
             full_args = f"-p {ports} {arguments}"
-            self.nm.scan(target, arguments=full_args, timeout=self.timeout)
-            
+            nm.scan(target, arguments=full_args, timeout=self.timeout)
+
             open_ports = []
-            
-            for host in self.nm.all_hosts():
-                for proto in self.nm[host].all_protocols():
-                    ports_dict = self.nm[host][proto]
+
+            for host in nm.all_hosts():
+                for proto in nm[host].all_protocols():
+                    ports_dict = nm[host][proto]
                     
                     for port, port_info in ports_dict.items():
                         if port_info["state"] == "open":
@@ -238,21 +262,32 @@ class ReconnaissanceEngine:
                 loop.run_in_executor(None, self.enumerate_subdomains, domain)
             )
         
-        # Wait for all tasks to complete
+        # Wait for all tasks to complete (ordem = port scan, DNS, subdomínios)
         if tasks:
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    self.logger.error(f"Reconnaissance task {i} failed: {result}")
+            gathered = await asyncio.gather(*tasks, return_exceptions=True)
+            idx = 0
+            if enable_port_scan:
+                r = gathered[idx]
+                idx += 1
+                if isinstance(r, Exception):
+                    self.logger.error(f"Port scan failed: {r}")
                 else:
-                    if enable_port_scan and i == 0:
-                        open_ports = result
-                    elif enable_dns:
-                        dns_records = result
-                    elif enable_subdomain:
-                        subdomains = result
-        
+                    open_ports = r
+            if enable_dns:
+                r = gathered[idx]
+                idx += 1
+                if isinstance(r, Exception):
+                    self.logger.error(f"DNS discovery failed: {r}")
+                else:
+                    dns_records = r
+            if enable_subdomain:
+                r = gathered[idx]
+                idx += 1
+                if isinstance(r, Exception):
+                    self.logger.error(f"Subdomain enumeration failed: {r}")
+                else:
+                    subdomains = r
+
         return ReconResult(
             target=target,
             open_ports=open_ports,

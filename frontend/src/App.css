@@ -164,6 +164,12 @@
   color: #fca5a5;
 }
 
+.alert-warn {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #fcd34d;
+}
+
 .alert-icon {
   font-size: 1.25rem;
 }

@@ -69,6 +69,15 @@ Lume V2.0 é uma ferramenta de segurança avançada que vai muito além de scann
             └──────────┘  └───────────┘
 ```
 
+## Estrutura do Projeto
+
+- `backend/`
+  - `api/` - rotas FastAPI e endpoints de varredura
+  - `core/` - motores de varredura dinâmicos e de segurança
+  - `reports/` - modelos e artefatos de relatório
+- `frontend/` - interface React + Vite
+- `lume/` - pacote principal com engines e utilitários
+
 ---
 
 ## Requisitos
@@ -155,6 +164,29 @@ pip install -r requirements.txt
 ```bash
 playwright install chromium
 ```
+
+---
+
+## Executando a aplicação
+
+### 5. Iniciar o backend FastAPI
+
+```bash
+cd backend
+python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Instale o pacote em modo editável na raiz do projeto (uma vez): `pip install -e .`
+
+### 6. Iniciar o frontend React + Vite
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+> O frontend faz proxy das requisições para `/api` diretamente para `http://127.0.0.1:8000`.
 
 ---
 
@@ -452,7 +484,7 @@ Para reportar issues ou sugestões:
 
 1. **Criar e abrir a pasta do projeto**
    ```bash
-   mkdir webvulnscanner && cd webvulnscanner
+   git clone <url-do-repositorio-lume> lume && cd lume
    ```
 
 2. **Criar ambiente virtual e ativar**
@@ -472,25 +504,18 @@ Para reportar issues ou sugestões:
    ```
 
 4. **Configurar o VSCode**
-   - Abra a pasta `webvulnscanner` no VSCode.
+   - Abra a pasta do projeto **Lume** no VSCode.
    - Selecione o interpretador Python da `.venv` (Ctrl+Shift+P → "Python: Select Interpreter").
    - Opcional: instale extensões **Python** e **Pylance**.
 
-5. **Executar o scanner (exemplos)**
+5. **Executar o scanner (exemplos, após `pip install -e .`)**
    ```bash
-   # checar apenas headers
-   python -m scanner.cli -u https://exemplo.com --no-xss --no-sqli
-
-   # rodar tudo e salvar relatórios na pasta padrão "reports/"
-   python -m scanner.cli -u "https://exemplo.com/produto.php?id=1"
-
-   # binário via entrypoint (após pip install .)
-   webscan -u https://exemplo.com
+   lume scan -u https://exemplo.com --help
+   lume scan -u https://exemplo.com -o ./relatorios -f html
    ```
 
 6. **Ver relatórios**
-   - JSON: `reports/scan.json`
-   - Markdown: `reports/scan.md`
+   - Relatórios gerados na pasta indicada em `-o` (por exemplo `./relatorios` ou o padrão do comando).
 
 7. **Rodar testes (opcional)**
    ```bash
@@ -518,26 +543,9 @@ Veja em `docs/prints` capturas ilustrativas da execução do CLI e do relatório
 
 ---
 
-## Opções de linha de comando
+## Opções de linha de comando (CLI)
 
-```
-usage: webscan [-h] -u URL [--no-xss] [--no-sqli] [--no-headers] [--timeout TIMEOUT]
-               [--insecure] [--report-dir REPORT_DIR] [--basename BASENAME]
-
-Scanner simples de vulnerabilidades (XSS, SQLi, headers inseguros)
-
-options:
-  -h, --help            show this help message and exit
-  -u URL, --url URL     URL alvo (ex: https://site.com/page.php?id=1)
-  --no-xss              Não executar teste de XSS
-  --no-sqli             Não executar teste de SQLi
-  --no-headers          Não checar headers de segurança
-  --timeout TIMEOUT     Timeout das requisições (s)
-  --insecure            Não verificar TLS/SSL (verify=False)
-  --report-dir REPORT_DIR
-                        Pasta para salvar relatórios
-  --basename BASENAME   Nome base dos arquivos de relatório
-```
+Use `lume scan --help` após `pip install -e .` para ver todas as opções (reconhecimento, navegador, segurança, SSL/TLS, relatórios HTML/JSON/PDF).
 
 ---
 
@@ -547,9 +555,10 @@ options:
 
 O projeto inclui um frontend moderno em React + TypeScript para uso via navegador:
 
-1. **Suba a API** (em um terminal):
+1. **Suba a API** (em um terminal, na pasta `backend`):
    ```bash
-   uvicorn api.main:app --reload --port 8000
+   cd backend
+   python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
    ```
 
 2. **Instale e inicie o frontend** (em outro terminal):
@@ -559,7 +568,7 @@ O projeto inclui um frontend moderno em React + TypeScript para uso via navegado
    npm run dev
    ```
 
-3. Acesse **http://localhost:5173** — interface com formulário de varredura, seleção de testes e visualização de resultados em tempo real.
+3. Acesse **http://127.0.0.1:5173** — formulário de varredura, seleção de testes e resultados.
 
 ---
 

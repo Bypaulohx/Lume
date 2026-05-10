@@ -88,7 +88,13 @@ class BrowserEngine:
             
         except Exception as e:
             self.logger.error(f"Failed to launch browser: {e}")
-            raise PlaywrightError(f"Browser launch failed: {e}")
+            detail = str(e) or type(e).__name__
+            if isinstance(e, NotImplementedError):
+                detail += (
+                    " — No Windows, instale o Chromium do Playwright (python -m playwright install chromium) "
+                    "e prefira o Python do python.org em vez da Microsoft Store."
+                )
+            raise PlaywrightError(f"Browser launch failed: {detail}")
     
     async def close(self):
         """Close browser"""

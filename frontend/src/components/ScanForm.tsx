@@ -9,34 +9,66 @@ interface Props {
   disabled?: boolean
 }
 
+function normalizeUrl(rawUrl: string) {
+  const trimmed = rawUrl.trim()
+  if (!trimmed) {
+    return ''
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed
+  }
+  return `https://${trimmed}`
+}
+
 export function ScanForm({ onResult, onError, onLoading, disabled }: Props) {
-  const [url, setUrl] = useState('http://testphp.vulnweb.com/')
+  const [url, setUrl] = useState('')
   const [xss, setXss] = useState(true)
   const [sqli, setSqli] = useState(true)
   const [headers, setHeaders] = useState(true)
+  const [infra, setInfra] = useState(true)
+  const [sslTls, setSslTls] = useState(true)
+  const [dynamic, setDynamic] = useState(true)
   const [insecure, setInsecure] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+
     if (!url.trim()) {
       onError('Informe a URL alvo.')
+      return
+    }
+
+    const targetUrl = normalizeUrl(url)
+    try {
+      new URL(targetUrl)
+    } catch {
+      onError('Formato de URL inválido. Use algo como exemplo.com ou https://exemplo.com')
       return
     }
 
     onLoading(true)
     try {
       const req: ScanRequest = {
-        url: url.trim(),
+        url: targetUrl,
         xss,
         sqli,
         headers,
+        infra,
+        ssl_tls: sslTls,
+        dynamic,
         timeout: 10,
         insecure,
       }
       const data = await runScan(req)
       onResult(data)
     } catch (err) {
-      onError(err instanceof Error ? err.message : 'Erro ao executar varredura.')
+      if (err instanceof Error) {
+        onError(err.message)
+      } else {
+        onError(
+          'Estamos analisando o site; isso pode levar alguns segundos dependendo da complexidade. Tente novamente daqui a pouco.',
+        )
+      }
     } finally {
       onLoading(false)
     }
@@ -48,12 +80,17 @@ export function ScanForm({ onResult, onError, onLoading, disabled }: Props) {
         <label htmlFor="url">URL alvo</label>
         <input
           id="url"
-          type="url"
+          type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://exemplo.com/page.php?id=1"
+          placeholder="Digite a URL alvo, por exemplo exemplo.com"
           disabled={disabled}
         />
+        {url.trim() && (
+          <p className="url-preview">
+            Será usado: <strong>{normalizeUrl(url)}</strong>
+          </p>
+        )}
       </div>
 
       <div className="form-group form-checks">
@@ -84,6 +121,33 @@ export function ScanForm({ onResult, onError, onLoading, disabled }: Props) {
             disabled={disabled}
           />
           SQL Injection
+        </label>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={infra}
+            onChange={(e) => setInfra(e.target.checked)}
+            disabled={disabled}
+          />
+          Scan de portas e rede (DNS / subdomínios)
+        </label>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={sslTls}
+            onChange={(e) => setSslTls(e.target.checked)}
+            disabled={disabled}
+          />
+          Análise de certificado SSL/TLS
+        </label>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={dynamic}
+            onChange={(e) => setDynamic(e.target.checked)}
+            disabled={disabled}
+          />
+          Simulação de Navegador (Dinâmico)
         </label>
         <label className="checkbox">
           <input

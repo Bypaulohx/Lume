@@ -1,7 +1,7 @@
 [project]
 name = "lume"
 version = "2.0.0"
-description = "Lume V2.0 - Advanced Web Vulnerability Scanner with Behavioral & Infrastructure Analysis"
+description = "Lume V2.0 — análise de segurança web com motores comportamental e de infraestrutura"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{name="Lume Security Team", email="security@lume.local"}]
@@ -41,6 +41,9 @@ dependencies = [
     "playwright>=1.44.0",
     "beautifulsoup4>=4.12.0",
     "requests>=2.32.3",
+    "zaproxy>=0.5.0",
+    "fastapi>=0.109.0",
+    "uvicorn>=0.25.0",
     "sslyze>=5.3.0",
     "jinja2>=3.1.2",
     "pdfkit>=1.0.0",
