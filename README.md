@@ -217,6 +217,32 @@ Options:
   -u, --url TEXT              Target URL (required)
   -o, --output PATH          Output directory (default: lume/reports)
   -f, --format [html|json|pdf]  Report format (default: html)
+   --max-pages INT            Maximum crawl pages (default: 50)
+   --timeout INT              Timeout seconds per phase (default: 20)
+
+---
+
+## Deploy no Vercel (rápido)
+
+O repositório já inclui uma configuração mínima para deploy no Vercel.
+O frontend é gerado como site estático (Vite) e a API `/api/scan` é um serverless Python
+que reutiliza a lógica existente (sem alterar os módulos de scan).
+
+Passos básicos:
+
+```bash
+# 1. Faça login no Vercel
+vercel login
+
+# 2. No diretório raiz do repositório, faça deploy (será detectado automaticamente)
+vercel --prod
+```
+
+Notas:
+- O builder do Vercel instalará dependências Python a partir de `requirements.txt`.
+- O endpoint serverless (`api/scan.py`) executa a mesma função de análise por request.
+- Scans longos podem exceder limites de execução serverless; para grandes cargas, use uma fila/worker.
+
   
   --no-recon                  Skip reconnaissance phase
   --no-browser                Skip browser crawling
