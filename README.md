@@ -2,7 +2,7 @@
 
 **Ferramenta Profissional de Análise de Segurança Web**
 
-*Do latim: iluminar falhas escondidas*
+*iluminar falhas escondidas*
 
 ---
 
@@ -493,16 +493,7 @@ MIT License - veja [LICENSE](LICENSE) para detalhes
 
 ---
 
-## Contato & Suporte
-
-Para reportar issues ou sugestões:
-- 📧 Email: security@example.com
-- 🐛 Issues: GitHub Issues
-- 💬 Discussions: GitHub Discussions
-
----
-
-*Iluminando falhas escondidas desde 2024* 🔍
+*Iluminando falhas escondidas desde 2026* 🔍
 
 ---
 
